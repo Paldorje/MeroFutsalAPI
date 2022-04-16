@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeroFutsal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220319093212_initialMigration")]
-    partial class initialMigration
+    [Migration("20220406081113_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,20 +30,17 @@ namespace MeroFutsal.Migrations
                     b.Property<DateTime>("BookingTime")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("CurrentUserEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("Groundid")
                         .HasColumnType("int");
 
                     b.Property<bool?>("Isdeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Userid")
-                        .HasColumnType("int");
-
                     b.HasKey("Bookingid");
-
-                    b.HasIndex("Groundid");
-
-                    b.HasIndex("Userid");
 
                     b.ToTable("Bookings");
                 });
@@ -62,9 +59,6 @@ namespace MeroFutsal.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
 
-                    b.Property<int?>("Groundid")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("Isdeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -75,12 +69,14 @@ namespace MeroFutsal.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("Ownerid")
-                        .HasColumnType("int");
+                    b.Property<string>("OwnerEmail")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("Futsalid");
 
-                    b.HasIndex("Groundid");
+                    b.HasIndex("OwnerEmail")
+                        .IsUnique();
 
                     b.ToTable("Futsals");
                 });
@@ -106,24 +102,36 @@ namespace MeroFutsal.Migrations
 
                     b.HasKey("Groundid");
 
+                    b.HasIndex("Futsalid");
+
                     b.ToTable("Grounds");
+                });
+
+            modelBuilder.Entity("MeroFutsal.Models.GroundBooking", b =>
+                {
+                    b.Property<int>("GroundId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GroundId", "BookingId");
+
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("GroundBooking");
                 });
 
             modelBuilder.Entity("MeroFutsal.Models.Owner", b =>
                 {
-                    b.Property<int>("Ownerid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -140,7 +148,7 @@ namespace MeroFutsal.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
 
-                    b.HasKey("Ownerid");
+                    b.HasKey("Email");
 
                     b.ToTable("Owners");
                 });
@@ -165,27 +173,41 @@ namespace MeroFutsal.Migrations
                     b.ToTable("Photos");
                 });
 
-            modelBuilder.Entity("MeroFutsal.User", b =>
+            modelBuilder.Entity("MeroFutsal.Models.UserBooking", b =>
                 {
-                    b.Property<int>("userid")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("UserEmail")
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("BookingId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                    b.HasKey("UserEmail", "BookingId");
 
+                    b.HasIndex("BookingId");
+
+                    b.ToTable("UserBooking");
+                });
+
+            modelBuilder.Entity("MeroFutsal.User", b =>
+                {
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
 
                     b.Property<bool?>("IsAvailable")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -200,40 +222,50 @@ namespace MeroFutsal.Migrations
                     b.Property<string>("Photo")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.HasKey("userid");
+                    b.HasKey("Email");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MeroFutsal.Models.Booking", b =>
-                {
-                    b.HasOne("MeroFutsal.Models.Ground", "Ground")
-                        .WithMany("Bookings")
-                        .HasForeignKey("Groundid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MeroFutsal.User", "User")
-                        .WithMany()
-                        .HasForeignKey("Userid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ground");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MeroFutsal.Models.Futsal", b =>
                 {
-                    b.HasOne("MeroFutsal.Models.Ground", null)
-                        .WithMany("Futsals")
-                        .HasForeignKey("Groundid");
+                    b.HasOne("MeroFutsal.Models.Owner", "Owners")
+                        .WithOne("Futsals")
+                        .HasForeignKey("MeroFutsal.Models.Futsal", "OwnerEmail")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owners");
+                });
+
+            modelBuilder.Entity("MeroFutsal.Models.Ground", b =>
+                {
+                    b.HasOne("MeroFutsal.Models.Futsal", "Futsals")
+                        .WithMany("Grounds")
+                        .HasForeignKey("Futsalid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Futsals");
+                });
+
+            modelBuilder.Entity("MeroFutsal.Models.GroundBooking", b =>
+                {
+                    b.HasOne("MeroFutsal.Models.Booking", "Booking")
+                        .WithMany("GroundBookings")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeroFutsal.Models.Ground", "Ground")
+                        .WithMany("GroundBookings")
+                        .HasForeignKey("GroundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Ground");
                 });
 
             modelBuilder.Entity("MeroFutsal.Models.Photo", b =>
@@ -247,11 +279,51 @@ namespace MeroFutsal.Migrations
                     b.Navigation("Futsal");
                 });
 
+            modelBuilder.Entity("MeroFutsal.Models.UserBooking", b =>
+                {
+                    b.HasOne("MeroFutsal.Models.Booking", "Booking")
+                        .WithMany("UserBookings")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeroFutsal.User", "User")
+                        .WithMany("UserBookings")
+                        .HasForeignKey("UserEmail")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MeroFutsal.Models.Booking", b =>
+                {
+                    b.Navigation("GroundBookings");
+
+                    b.Navigation("UserBookings");
+                });
+
+            modelBuilder.Entity("MeroFutsal.Models.Futsal", b =>
+                {
+                    b.Navigation("Grounds");
+                });
+
             modelBuilder.Entity("MeroFutsal.Models.Ground", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("GroundBookings");
+                });
 
-                    b.Navigation("Futsals");
+            modelBuilder.Entity("MeroFutsal.Models.Owner", b =>
+                {
+                    b.Navigation("Futsals")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MeroFutsal.User", b =>
+                {
+                    b.Navigation("UserBookings");
                 });
 #pragma warning restore 612, 618
         }

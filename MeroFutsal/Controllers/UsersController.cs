@@ -6,68 +6,67 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MeroFutsal;
 using MeroFutsal.Data;
-using MeroFutsal.Models;
 
 namespace MeroFutsal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OwnersController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly DataContext _context;
 
-        public OwnersController(DataContext context)
+        public UsersController(DataContext context)
         {
             _context = context;
         }
 
-        // GET: api/Owners
+        // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Owner>>> GetOwners()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Owners.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Owners/5
+        // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Owner>> GetOwner(string id)
+        public async Task<ActionResult<User>> GetUser(string id)
         {
-            var owner = await _context.Owners.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
 
-            if (owner == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return owner;
+            return user;
         }
 
-
         [HttpPost("login {email}, {password}")]
-        public async Task<ActionResult<Owner>> PostOwner(string email, string password)
+        public async Task<ActionResult<User>> PostUser(string email, string password)
         {
-            var owner = await _context.Owners.FindAsync(email);
+            var user = await _context.Users.FindAsync(email);
 
-            if (owner != null && owner.Password == password)
+            if (user != null && user.Password ==password)
             {
-                return owner;
+                return user;
             }
 
             return NotFound();
         }
 
-        // PUT: api/Owners/5
+        // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOwner(string id, Owner owner)
+        public async Task<IActionResult> PutUser(string id, User user)
         {
-            if (id != owner.Email)
+            if (id != user.Email)
             {
                 return BadRequest();
             }
 
-            _context.Entry(owner).State = EntityState.Modified;
+            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
@@ -75,7 +74,7 @@ namespace MeroFutsal.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OwnerExists(id))
+                if (!UserExists(id))
                 {
                     return NotFound();
                 }
@@ -88,19 +87,19 @@ namespace MeroFutsal.Controllers
             return NoContent();
         }
 
-        // POST: api/Owners
+        // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Owner>> PostOwner(Owner owner)
+        public async Task<ActionResult<User>> PostUser(User user)
         {
-            _context.Owners.Add(owner);
+            _context.Users.Add(user);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (OwnerExists(owner.Email))
+                if (UserExists(user.Email))
                 {
                     return Conflict();
                 }
@@ -110,28 +109,28 @@ namespace MeroFutsal.Controllers
                 }
             }
 
-            return CreatedAtAction("GetOwner", new { id = owner.Email }, owner);
+            return CreatedAtAction("GetUser", new { id = user.Email }, user);
         }
 
-        // DELETE: api/Owners/5
+        // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOwner(string id)
+        public async Task<IActionResult> DeleteUser(string id)
         {
-            var owner = await _context.Owners.FindAsync(id);
-            if (owner == null)
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Owners.Remove(owner);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool OwnerExists(string id)
+        private bool UserExists(string id)
         {
-            return _context.Owners.Any(e => e.Email == id);
+            return _context.Users.Any(e => e.Email == id);
         }
     }
 }

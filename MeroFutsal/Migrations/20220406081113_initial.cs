@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MeroFutsal.Migrations
 {
-    public partial class initialMigration : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,20 +14,20 @@ namespace MeroFutsal.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Grounds",
+                name: "Bookings",
                 columns: table => new
                 {
-                    Groundid = table.Column<int>(type: "int", nullable: false)
+                    Bookingid = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    GroundName = table.Column<string>(type: "longtext", nullable: false)
+                    CurrentUserEmail = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Futsalid = table.Column<int>(type: "int", nullable: false),
-                    Isreserved = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    Isdeleted = table.Column<bool>(type: "tinyint(1)", nullable: true)
+                    Groundid = table.Column<int>(type: "int", nullable: false),
+                    Isdeleted = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    BookingTime = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Grounds", x => x.Groundid);
+                    table.PrimaryKey("PK_Bookings", x => x.Bookingid);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -35,11 +35,9 @@ namespace MeroFutsal.Migrations
                 name: "Owners",
                 columns: table => new
                 {
-                    Ownerid = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -50,7 +48,7 @@ namespace MeroFutsal.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Owners", x => x.Ownerid);
+                    table.PrimaryKey("PK_Owners", x => x.Email);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -58,15 +56,13 @@ namespace MeroFutsal.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    userid = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Address = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
+                    Address = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Photo = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -77,7 +73,7 @@ namespace MeroFutsal.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.userid);
+                    table.PrimaryKey("PK_Users", x => x.Email);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -94,45 +90,67 @@ namespace MeroFutsal.Migrations
                     Location = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Isdeleted = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    Ownerid = table.Column<int>(type: "int", nullable: false),
-                    Groundid = table.Column<int>(type: "int", nullable: true)
+                    OwnerEmail = table.Column<string>(type: "varchar(100)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Futsals", x => x.Futsalid);
                     table.ForeignKey(
-                        name: "FK_Futsals_Grounds_Groundid",
-                        column: x => x.Groundid,
-                        principalTable: "Grounds",
-                        principalColumn: "Groundid");
+                        name: "FK_Futsals_Owners_OwnerEmail",
+                        column: x => x.OwnerEmail,
+                        principalTable: "Owners",
+                        principalColumn: "Email",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Bookings",
+                name: "UserBooking",
                 columns: table => new
                 {
-                    Bookingid = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Userid = table.Column<int>(type: "int", nullable: false),
-                    Groundid = table.Column<int>(type: "int", nullable: false),
-                    Isdeleted = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    BookingTime = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    UserEmail = table.Column<string>(type: "varchar(100)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BookingId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bookings", x => x.Bookingid);
+                    table.PrimaryKey("PK_UserBooking", x => new { x.UserEmail, x.BookingId });
                     table.ForeignKey(
-                        name: "FK_Bookings_Grounds_Groundid",
-                        column: x => x.Groundid,
-                        principalTable: "Grounds",
-                        principalColumn: "Groundid",
+                        name: "FK_UserBooking_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Bookingid",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Bookings_Users_Userid",
-                        column: x => x.Userid,
+                        name: "FK_UserBooking_Users_UserEmail",
+                        column: x => x.UserEmail,
                         principalTable: "Users",
-                        principalColumn: "userid",
+                        principalColumn: "Email",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Grounds",
+                columns: table => new
+                {
+                    Groundid = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    GroundName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Isreserved = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    Isdeleted = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    Futsalid = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Grounds", x => x.Groundid);
+                    table.ForeignKey(
+                        name: "FK_Grounds_Futsals_Futsalid",
+                        column: x => x.Futsalid,
+                        principalTable: "Futsals",
+                        principalColumn: "Futsalid",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -159,37 +177,74 @@ namespace MeroFutsal.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Bookings_Groundid",
-                table: "Bookings",
-                column: "Groundid");
+            migrationBuilder.CreateTable(
+                name: "GroundBooking",
+                columns: table => new
+                {
+                    GroundId = table.Column<int>(type: "int", nullable: false),
+                    BookingId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroundBooking", x => new { x.GroundId, x.BookingId });
+                    table.ForeignKey(
+                        name: "FK_GroundBooking_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Bookingid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GroundBooking_Grounds_GroundId",
+                        column: x => x.GroundId,
+                        principalTable: "Grounds",
+                        principalColumn: "Groundid",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_Userid",
-                table: "Bookings",
-                column: "Userid");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Futsals_Groundid",
+                name: "IX_Futsals_OwnerEmail",
                 table: "Futsals",
-                column: "Groundid");
+                column: "OwnerEmail",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GroundBooking_BookingId",
+                table: "GroundBooking",
+                column: "BookingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Grounds_Futsalid",
+                table: "Grounds",
+                column: "Futsalid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Photos_Futsalid",
                 table: "Photos",
                 column: "Futsalid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserBooking_BookingId",
+                table: "UserBooking",
+                column: "BookingId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Bookings");
-
-            migrationBuilder.DropTable(
-                name: "Owners");
+                name: "GroundBooking");
 
             migrationBuilder.DropTable(
                 name: "Photos");
+
+            migrationBuilder.DropTable(
+                name: "UserBooking");
+
+            migrationBuilder.DropTable(
+                name: "Grounds");
+
+            migrationBuilder.DropTable(
+                name: "Bookings");
 
             migrationBuilder.DropTable(
                 name: "Users");
@@ -198,7 +253,7 @@ namespace MeroFutsal.Migrations
                 name: "Futsals");
 
             migrationBuilder.DropTable(
-                name: "Grounds");
+                name: "Owners");
         }
     }
 }

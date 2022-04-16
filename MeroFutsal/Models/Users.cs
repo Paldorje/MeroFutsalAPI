@@ -1,18 +1,13 @@
-﻿using MeroFutsal.Models;
-
-namespace MeroFutsal
+﻿namespace MeroFutsal
 {
     public class User
     {
 
-        [Required(ErrorMessage = "user ID is required.")]
-        public int userid { get; set; }
-
-
         [Required(ErrorMessage = "Name field is required.")]
         [StringLength(maximumLength: 100, MinimumLength = 2)]
-        public string name { get; set; }
+        public string Name { get; set; }
 
+        [Key]
         [Required(ErrorMessage = "Email field is required.")]
         [StringLength(maximumLength: 100, MinimumLength = 2)]
         [EmailAddress]
@@ -25,19 +20,20 @@ namespace MeroFutsal
 
 
         [StringLength(maximumLength: 250)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         public string? Photo { get; set; }
 
-        public bool? IsAvailable { get; set; }
+        public bool? IsAvailable { get; set; } = true;
 
-        public bool? IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; } = false;
 
         [Required(ErrorMessage = "Phone field is required.")]
-        [StringLength(maximumLength: 15, MinimumLength = 10)]
-        public string Phone { get; set; }
+        [StringLength(maximumLength: 15, MinimumLength = 5)]
+        public string? Phone { get; set; }
 
-
+        [JsonIgnore]
+        public IList<UserBooking>? UserBookings  { get; set; }
 
     }
 }

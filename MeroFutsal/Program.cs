@@ -2,6 +2,8 @@ global using System.ComponentModel.DataAnnotations;
 global using Microsoft.EntityFrameworkCore;
 global using MeroFutsal.Models;
 global using MeroFutsal.Data;
+global using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,15 +15,6 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-//builder.Services.AddDbContext<FutsalDataContext>(options =>
-//{
-//    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-//});
-
-//builder.Services.AddDbContext<DataContext>(options =>
-//{
-//    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-//});
 
 
 builder.Services.AddEndpointsApiExplorer();

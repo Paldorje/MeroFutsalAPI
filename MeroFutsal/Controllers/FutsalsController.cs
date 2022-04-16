@@ -1,5 +1,14 @@
 ﻿#nullable disable
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MeroFutsal.Data;
+using MeroFutsal.Models;
+
 namespace MeroFutsal.Controllers
 {
     [Route("api/[controller]")]
@@ -15,16 +24,20 @@ namespace MeroFutsal.Controllers
 
         // GET: api/Futsals
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Futsal>>> Getfutsal()
+        public async Task<ActionResult<IEnumerable<Futsal>>> GetFutsals()
         {
             return await _context.Futsals.ToListAsync();
         }
 
         // GET: api/Futsals/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Futsal>> GetFutsal(int id)
+        public async Task<ActionResult<List<Futsal>>> GetFutsal(int id)
         {
-            var futsal = await _context.Futsals.FindAsync(id);
+            var futsal = await _context.Futsals
+                .Where(f => f.Futsalid == id)
+                .Include(f => f.Owners)
+                .Include(f => f.Grounds)
+                .ToListAsync();
 
             if (futsal == null)
             {
@@ -35,6 +48,7 @@ namespace MeroFutsal.Controllers
         }
 
         // PUT: api/Futsals/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFutsal(int id, Futsal futsal)
         {
@@ -65,13 +79,43 @@ namespace MeroFutsal.Controllers
         }
 
         // POST: api/Futsals
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Futsal>> PostFutsal(Futsal futsal)
+        public async Task<ActionResult<Futsal>> PostFutsal(CreateFutsalDto request)
         {
-            _context.Futsals.Add(futsal);
-            await _context.SaveChangesAsync();
+            var owner = await _context.Owners.FindAsync(request.OwnerEmail);
+            if (owner == null)
+                return NotFound();
 
-            return CreatedAtAction("GetFutsal", new { id = futsal.Futsalid }, futsal);
+            var newFutsal = new Futsal
+            {
+                Futsalid = request.Futsalid,
+                FutsalName = request.FutsalName,
+                Cost = request.Cost,
+                Location = request.Location,
+                IsDeleted = request.IsDeleted,
+                IsReserved = request.IsReserved,
+                OwnerEmail = request.OwnerEmail,
+            };
+
+            _context.Futsals.Add(newFutsal);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (FutsalExists(newFutsal.Futsalid))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return CreatedAtAction("GetFutsal", new { id = newFutsal.Futsalid }, newFutsal);
         }
 
         // DELETE: api/Futsals/5
