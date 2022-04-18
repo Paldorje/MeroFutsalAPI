@@ -10,9 +10,6 @@
         public bool? Isdeleted { get; set; } = false;
 
         [JsonIgnore]
-        public IList<GroundBooking>? GroundBookings { get; set; }
-
-        [JsonIgnore]
         public Futsal Futsals { get; set; }
 
         public int Futsalid { get; set; }

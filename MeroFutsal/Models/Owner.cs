@@ -26,10 +26,16 @@
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Phone field is required.")]
-        [StringLength(maximumLength: 15, MinimumLength = 10)]
-        public string Phone { get; set; }
+        [StringLength(maximumLength: 10, MinimumLength = 5)]
+        public string? Phone { get; set; }
+
+        public string? Photo { get; set; } = "url";
+
+        public bool? IsAvailable { get; set; } = true;
+
+        public bool? IsDeleted { get; set; } = false;
 
         [JsonIgnore]
-        public Futsal Futsals { get; set; }
+        public IList<Futsal>? futsals { get; set; }
     }
 }

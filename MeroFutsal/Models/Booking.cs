@@ -6,12 +6,12 @@
 
             public int Bookingid { get; set; }
             public string CurrentUserEmail { get; set; }
-            public int Groundid { get; set; }
+            public int Futsaldid { get; set; }
             public bool? Isdeleted { get; set; } = false;
             public DateTime BookingTime { get; set; }
 
         [JsonIgnore]
-        public IList<GroundBooking>? GroundBookings { get; set; }
+        public IList<FutsalBooking>? FutsalBookings { get; set; }
 
         [JsonIgnore]
         public IList<UserBooking>? UserBookings { get; set; }

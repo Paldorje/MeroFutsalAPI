@@ -19,7 +19,7 @@ namespace MeroFutsal.Data
 
             public DbSet<UserBooking> UserBooking { get; set; }
 
-            public DbSet<GroundBooking> GroundBooking { get; set; } 
+            public DbSet<FutsalBooking> FutsalBooking { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,8 +27,8 @@ namespace MeroFutsal.Data
             modelBuilder.Entity<UserBooking>()
                 .HasKey(ub => new { ub.UserEmail, ub.BookingId });
 
-            modelBuilder.Entity<GroundBooking>()
-                .HasKey(gb => new { gb.GroundId, gb.BookingId });
+            modelBuilder.Entity<FutsalBooking>()
+                .HasKey(fb => new { fb.FutsalId, fb.BookingId });
 
 
             //modelBuilder.Entity<Owner>()

@@ -22,14 +22,14 @@
         [StringLength(maximumLength: 250)]
         public string? Address { get; set; }
 
-        public string? Photo { get; set; }
+        public string? Photo { get; set; } = "url";
 
         public bool? IsAvailable { get; set; } = true;
 
         public bool? IsDeleted { get; set; } = false;
 
         [Required(ErrorMessage = "Phone field is required.")]
-        [StringLength(maximumLength: 15, MinimumLength = 5)]
+        [StringLength(maximumLength: 10, MinimumLength = 5)]
         public string? Phone { get; set; }
 
         [JsonIgnore]

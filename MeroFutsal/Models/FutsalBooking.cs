@@ -1,10 +1,10 @@
 ﻿namespace MeroFutsal.Models
 {
-    public class GroundBooking
+    public class FutsalBooking
     {
-        public int GroundId { get; set; }
+        public int FutsalId { get; set; }
 
-        public Ground Ground { get; set; }
+        public Futsal Futsal { get; set; }
 
         public int BookingId { get; set; }  
 

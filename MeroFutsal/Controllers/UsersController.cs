@@ -30,10 +30,10 @@ namespace MeroFutsal.Controllers
         }
 
         // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(string id)
+        [HttpGet("{email}")]
+        public async Task<ActionResult<User>> GetUser(string email)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(email);
 
             if (user == null)
             {

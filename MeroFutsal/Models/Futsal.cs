@@ -24,5 +24,8 @@
 
         [JsonIgnore]
         public List<Ground> Grounds { get; set; }
+
+        [JsonIgnore]
+        public IList<FutsalBooking>? FutsalBookings { get; set; }
     }
 }

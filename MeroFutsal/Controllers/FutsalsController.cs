@@ -29,12 +29,26 @@ namespace MeroFutsal.Controllers
             return await _context.Futsals.ToListAsync();
         }
 
-        // GET: api/Futsals/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<List<Futsal>>> GetFutsal(int id)
+        public async Task<ActionResult<Futsal>> GetFutsal(int id)
+        {
+            var futsal = await _context.Futsals.FindAsync(id);
+     
+
+            if (futsal == null)
+            {
+                return NotFound();
+            }
+
+            return futsal;
+        }
+
+        // GET: api/Futsals/5
+        [HttpGet("myFutsal {ownerEmail}")]
+        public async Task<ActionResult<List<Futsal>>> GetFutsal(string ownerEmail)
         {
             var futsal = await _context.Futsals
-                .Where(f => f.Futsalid == id)
+                .Where(f => f.OwnerEmail == ownerEmail)
                 .Include(f => f.Owners)
                 .Include(f => f.Grounds)
                 .ToListAsync();
