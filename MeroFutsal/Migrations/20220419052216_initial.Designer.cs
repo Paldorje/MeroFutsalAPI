@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeroFutsal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220418114448_initial")]
+    [Migration("20220419052216_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,14 +88,9 @@ namespace MeroFutsal.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Groundid")
-                        .HasColumnType("int");
-
                     b.HasKey("FutsalId", "BookingId");
 
                     b.HasIndex("BookingId");
-
-                    b.HasIndex("Groundid");
 
                     b.ToTable("FutsalBooking");
                 });
@@ -148,10 +143,13 @@ namespace MeroFutsal.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longblob");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("longblob");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -222,10 +220,13 @@ namespace MeroFutsal.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longblob");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("longblob");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -264,10 +265,6 @@ namespace MeroFutsal.Migrations
                         .HasForeignKey("FutsalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("MeroFutsal.Models.Ground", null)
-                        .WithMany("GroundBookings")
-                        .HasForeignKey("Groundid");
 
                     b.Navigation("Booking");
 
@@ -327,11 +324,6 @@ namespace MeroFutsal.Migrations
                     b.Navigation("FutsalBookings");
 
                     b.Navigation("Grounds");
-                });
-
-            modelBuilder.Entity("MeroFutsal.Models.Ground", b =>
-                {
-                    b.Navigation("GroundBookings");
                 });
 
             modelBuilder.Entity("MeroFutsal.Models.Owner", b =>

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MeroFutsal.Data;
 using MeroFutsal.Models;
+using System.Security.Cryptography;
 
 namespace MeroFutsal.Controllers
 {
@@ -43,18 +44,51 @@ namespace MeroFutsal.Controllers
             return owner;
         }
 
+        [HttpGet("byEmail{email}")]
+        public async Task<ActionResult<OwnerDto>> GetOwnerByEmail(string email)
+        {
+            var owner = await _context.Owners.FindAsync(email);
+
+            if (owner == null)
+            {
+                return NotFound();
+            }
+
+            var owner1 = new OwnerDto
+            {
+                Email = owner.Email,
+                Password = "can't show",
+                Name = owner.Name,
+                Address = owner.Address,
+                Phone = owner.Phone,
+                Photo = owner.Photo,
+                IsAvailable = owner.IsAvailable,
+                IsDeleted = owner.IsDeleted,
+
+            };
+
+            return owner1;
+        }
+
 
         [HttpPost("login {email}, {password}")]
         public async Task<ActionResult<Owner>> PostOwner(string email, string password)
         {
             var owner = await _context.Owners.FindAsync(email);
 
-            if (owner != null && owner.Password == password)
+            if (owner.Email != email)
             {
-                return owner;
+                return BadRequest("User Not Found");
             }
 
-            return NotFound();
+            if (!VerifyPasswordHash(password, owner.PasswordHash, owner.PasswordSalt))
+            {
+                return BadRequest("Wrong Password");
+            }
+
+            //string token = CreateToken(user);
+
+            return Ok(owner);
         }
 
         // PUT: api/Owners/5
@@ -91,8 +125,25 @@ namespace MeroFutsal.Controllers
         // POST: api/Owners
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Owner>> PostOwner(Owner owner)
+        public async Task<ActionResult<Owner>> PostOwner(OwnerDto request)
         {
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            var owner = new Owner
+            {
+                Email = request.Email,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                Name = request.Name,
+                Address = request.Address,
+                Phone = request.Phone,
+                Photo = request.Photo,
+                IsAvailable = request.IsAvailable,
+                IsDeleted = request.IsDeleted,
+
+            };
+
+
             _context.Owners.Add(owner);
             try
             {
@@ -132,6 +183,24 @@ namespace MeroFutsal.Controllers
         private bool OwnerExists(string id)
         {
             return _context.Owners.Any(e => e.Email == id);
+        }
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computeHash.SequenceEqual(passwordHash);
+            }
         }
     }
 }

@@ -39,8 +39,8 @@ namespace MeroFutsal.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PasswordHash = table.Column<byte[]>(type: "longblob", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "longblob", nullable: false),
                     Address = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Phone = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false)
@@ -64,8 +64,8 @@ namespace MeroFutsal.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PasswordHash = table.Column<byte[]>(type: "longblob", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "longblob", nullable: false),
                     Address = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Photo = table.Column<string>(type: "longtext", nullable: true)
@@ -136,6 +136,31 @@ namespace MeroFutsal.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "FutsalBooking",
+                columns: table => new
+                {
+                    FutsalId = table.Column<int>(type: "int", nullable: false),
+                    BookingId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FutsalBooking", x => new { x.FutsalId, x.BookingId });
+                    table.ForeignKey(
+                        name: "FK_FutsalBooking_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Bookingid",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FutsalBooking_Futsals_FutsalId",
+                        column: x => x.FutsalId,
+                        principalTable: "Futsals",
+                        principalColumn: "Futsalid",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Grounds",
                 columns: table => new
                 {
@@ -181,46 +206,10 @@ namespace MeroFutsal.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
-                name: "FutsalBooking",
-                columns: table => new
-                {
-                    FutsalId = table.Column<int>(type: "int", nullable: false),
-                    BookingId = table.Column<int>(type: "int", nullable: false),
-                    Groundid = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FutsalBooking", x => new { x.FutsalId, x.BookingId });
-                    table.ForeignKey(
-                        name: "FK_FutsalBooking_Bookings_BookingId",
-                        column: x => x.BookingId,
-                        principalTable: "Bookings",
-                        principalColumn: "Bookingid",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FutsalBooking_Futsals_FutsalId",
-                        column: x => x.FutsalId,
-                        principalTable: "Futsals",
-                        principalColumn: "Futsalid",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FutsalBooking_Grounds_Groundid",
-                        column: x => x.Groundid,
-                        principalTable: "Grounds",
-                        principalColumn: "Groundid");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_FutsalBooking_BookingId",
                 table: "FutsalBooking",
                 column: "BookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FutsalBooking_Groundid",
-                table: "FutsalBooking",
-                column: "Groundid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Futsals_OwnerEmail",
@@ -249,22 +238,22 @@ namespace MeroFutsal.Migrations
                 name: "FutsalBooking");
 
             migrationBuilder.DropTable(
+                name: "Grounds");
+
+            migrationBuilder.DropTable(
                 name: "Photos");
 
             migrationBuilder.DropTable(
                 name: "UserBooking");
 
             migrationBuilder.DropTable(
-                name: "Grounds");
+                name: "Futsals");
 
             migrationBuilder.DropTable(
                 name: "Bookings");
 
             migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Futsals");
 
             migrationBuilder.DropTable(
                 name: "Owners");

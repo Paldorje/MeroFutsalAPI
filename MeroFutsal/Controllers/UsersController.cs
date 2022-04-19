@@ -1,13 +1,7 @@
-﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MeroFutsal;
-using MeroFutsal.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MeroFutsal.Controllers
 {
@@ -31,7 +25,7 @@ namespace MeroFutsal.Controllers
 
         // GET: api/Users/5
         [HttpGet("{email}")]
-        public async Task<ActionResult<User>> GetUser(string email)
+        public async Task<ActionResult<UserDto>> GetUser(string email)
         {
             var user = await _context.Users.FindAsync(email);
 
@@ -40,7 +34,20 @@ namespace MeroFutsal.Controllers
                 return NotFound();
             }
 
-            return user;
+            var user1 = new UserDto
+            {
+                Email = user.Email,
+                Password = "can't show",
+                Name = user.Name,
+                Address = user.Address,
+                Phone = user.Phone,
+                Photo = user.Photo,
+                IsAvailable = user.IsAvailable,
+                IsDeleted = user.IsDeleted,
+
+            };
+
+            return user1;
         }
 
         [HttpPost("login {email}, {password}")]
@@ -48,13 +55,32 @@ namespace MeroFutsal.Controllers
         {
             var user = await _context.Users.FindAsync(email);
 
-            if (user != null && user.Password ==password)
+            if (user.Email != email)
             {
-                return user;
+                return BadRequest("User Not Found");
             }
 
-            return NotFound();
+            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
+                return BadRequest("Wrong Password");
+            }
+
+            //string token = CreateToken(user);
+
+            return Ok(user);
         }
+
+        //private string CreateToken(User user)
+        //{
+        //    List<Claim> claims = new List<Claim>
+        //    {
+        //        new Claim(ClaimTypes.Name, user.Name)
+        //    };
+
+        //    var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes())
+
+        //    return string.Empty;
+        //}
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -87,11 +113,32 @@ namespace MeroFutsal.Controllers
             return NoContent();
         }
 
+
+     
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> PostUser(UserDto request)
         {
+
+   
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            var user = new User
+            {
+                Email = request.Email,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                Name = request.Name,
+                Address = request.Address,
+                Phone = request.Phone,
+                Photo = request.Photo,
+                IsAvailable = request.IsAvailable,
+                IsDeleted = request.IsDeleted,
+
+            };
+
+
             _context.Users.Add(user);
             try
             {
@@ -131,6 +178,24 @@ namespace MeroFutsal.Controllers
         private bool UserExists(string id)
         {
             return _context.Users.Any(e => e.Email == id);
+        }
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using(var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computeHash.SequenceEqual(passwordHash);
+            }
         }
     }
 }
